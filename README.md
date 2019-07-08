@@ -45,6 +45,8 @@
 * Site Speed
 * App Tracking
 
+**Google Analytics Service Account Email: ga-etl-bioregistra@ga-bioregistra-etl.iam.gserviceaccount.com** 
+
 
 
 
