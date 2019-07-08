@@ -1,7 +1,7 @@
 # Google Analytics (Bioregistra)
 
 ## Ids
-* Identification used to query a the google analytics board
+* Identification used to query a view of the google analytics board
 
 ## Metrics
 * Aggregates all user activities on a webpage
