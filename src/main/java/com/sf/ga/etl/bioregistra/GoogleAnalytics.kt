@@ -6,21 +6,15 @@ import com.google.api.client.http.HttpTransport
 import com.google.api.client.json.jackson2.JacksonFactory
 import com.google.api.services.analyticsreporting.v4.AnalyticsReporting
 import com.google.api.services.analyticsreporting.v4.AnalyticsReportingScopes
-import com.google.api.services.analyticsreporting.v4.model.DateRange
-import com.google.api.services.analyticsreporting.v4.model.GetReportsRequest
-import com.google.api.services.analyticsreporting.v4.model.Metric
-import com.google.api.services.analyticsreporting.v4.model.ReportRequest
+import com.google.api.services.analyticsreporting.v4.model.*
 import org.json.JSONObject
 import java.io.*
 import java.lang.IllegalStateException
+import java.net.UnknownHostException
 import java.security.GeneralSecurityException
-import com.google.api.services.analyticsreporting.v4.model.DateRangeValues
-import com.google.api.services.analyticsreporting.v4.model.ReportRow
-import com.google.api.services.analyticsreporting.v4.model.MetricHeaderEntry
-import com.google.api.services.analyticsreporting.v4.model.ColumnHeader
-import com.google.api.services.analyticsreporting.v4.model.Report
-import com.google.api.services.analyticsreporting.v4.model.GetReportsResponse
-
+import java.text.SimpleDateFormat
+import java.util.*
+import kotlin.collections.ArrayList
 
 
 /**
@@ -34,6 +28,7 @@ class GoogleAnalytics {
         private const val GA_PREFIX = "ga:"
         private const val APPLICATION_NAME = "Google Analytics ETL BioRegistra"
         private const val GOOGLE_ANALYTICS_VIEW_ID = "150721365"
+        private const val CSV_PREFIX = "GA-BIOREGISTRA-"
     }
 
     private lateinit var query: JSONObject
@@ -43,11 +38,11 @@ class GoogleAnalytics {
      * @param path to the Query Json file
      * @return JSONObject containing the JSON
      */
-    private fun loadJsonQuery(path: String): JSONObject{
+    private fun loadJsonQuery(path: String): JSONObject {
         val file = File(path)
-        if(file.exists()) {
+        if (file.exists()) {
             println("Loading: ${file.name} from ${file.parent}")
-            return FileReader(file).use {reader ->
+            return FileReader(file).use { reader ->
                 JSONObject(reader.readText())
             }
         }
@@ -62,7 +57,7 @@ class GoogleAnalytics {
      */
     private fun loadGoogleAnalyticsCredentials(path: String): InputStream? {
         val file = File(path)
-        if (file.exists())  {
+        if (file.exists()) {
             println("Loading: ${file.name} from ${file.parent}")
             return FileInputStream(file)
         }
@@ -77,7 +72,10 @@ class GoogleAnalytics {
      * @return AnalyticsReporting
      */
     @Throws(GeneralSecurityException::class, IOException::class)
-    fun initialiseAnalytics(googleAnalyticsCredentialPath: String, googleAnalyticsQueryPath: String): AnalyticsReporting {
+    fun initialiseAnalytics(
+        googleAnalyticsCredentialPath: String,
+        googleAnalyticsQueryPath: String
+    ): AnalyticsReporting {
 
         println("Initialising Google Analytics . . .")
 
@@ -93,7 +91,7 @@ class GoogleAnalytics {
                 APPLICATION_NAME
             )
                 .build()
-        }  ?: throw IllegalStateException("Unable to initialise Analytics Reporting tool")
+        } ?: throw IllegalStateException("Unable to initialise Analytics Reporting tool")
     }
 
     /**
@@ -110,14 +108,30 @@ class GoogleAnalytics {
         println("Setting Date range from: ${dateRange.startDate} to ${dateRange.endDate}")
 
         // Create metrics
-        val metric = Metric().apply {
-            val queries = query.getJSONArray(QueryConstants.QUERIES)
-            val query= queries.getJSONObject(0)
-            val metrics = query.getJSONArray(QueryConstants.QUERY_METRICS)
-            metrics.forEach { println("Setting metrics: $it\n") }
-            val metric = metrics.getString(0)
-            this.expression = GA_PREFIX.plus(metric)
-            this.alias = metric
+        val queries = query.getJSONArray(QueryConstants.QUERIES)
+        val query = queries.getJSONObject(0)
+        val metrics = query.getJSONArray(QueryConstants.QUERY_METRICS)
+        val listOfMetrics = ArrayList<Metric>()
+        metrics.forEachIndexed { _, expression ->
+            val metric = Metric().apply {
+                this.expression = GA_PREFIX.plus(expression)
+                this.alias = expression as String
+                println("Setting metrics: ${this.expression}\n")
+            }
+            listOfMetrics.add(metric)
+        }
+
+        // Create Dimension
+        val dimensions = query.getJSONArray(QueryConstants.QUERY_METRIC_DIMENSIONS).toList()
+        val otherDimensions = query.getJSONArray(QueryConstants.QUERY_OTHER_DIMENSIONS).toList()
+        val allDimensions = arrayListOf(*dimensions.toTypedArray(), *otherDimensions.toTypedArray())
+        val listOfDimensions = ArrayList<Dimension>()
+        dimensions.forEachIndexed { _, expression ->
+            val dimension = Dimension().apply {
+                this.name = GA_PREFIX.plus(expression)
+                println("Applying dimensions: ${this.name}\n")
+            }
+            listOfDimensions.add(dimension)
         }
 
         println("Creating Google Analytics Report Request")
@@ -125,7 +139,8 @@ class GoogleAnalytics {
         val reportRequest = ReportRequest().apply {
             this.viewId = GA_PREFIX.plus(GOOGLE_ANALYTICS_VIEW_ID)
             this.dateRanges = arrayListOf(dateRange)
-            this.metrics = arrayListOf(metric)
+            this.metrics = listOfMetrics
+            this.dimensions = listOfDimensions
 
         }
 
@@ -137,8 +152,11 @@ class GoogleAnalytics {
 
     /**
      * This method makes a request to Google Analytics
+     * @param request containing the query
+     * @param analyticsReporter used to make the reports
      * @return GetReportsResponse containing the responses
      */
+    @Throws(UnknownHostException::class)
     fun makeRequest(request: GetReportsRequest, analyticsReporter: AnalyticsReporting): GetReportsResponse {
         println("Making request to Google Analytics with View ID: $GOOGLE_ANALYTICS_VIEW_ID")
         return analyticsReporter.reports().batchGet(request).execute()
@@ -149,40 +167,82 @@ class GoogleAnalytics {
      *
      * @param response An Analytics Reporting API V4 response.
      */
-    fun printResponse(response: GetReportsResponse) {
+    fun generateCSV(response: GetReportsResponse, destinationPath: String) {
 
-        for (report in response.reports) {
-            val header = report.columnHeader
-            val dimensionHeaders = header.dimensions
-            val metricHeaders = header.metricHeader.metricHeaderEntries
-            val rows = report.data.rows
+        val destinationDir = File(destinationPath)
 
-            if (rows == null) {
-                System.out.println("No data found for $GOOGLE_ANALYTICS_VIEW_ID")
-                return
-            }
+        if (destinationDir.exists()) {
 
-            for (row in rows) {
-                val dimensions = row.dimensions
-                val metrics = row.metrics
+            val csv = File(destinationDir, "$CSV_PREFIX${generateDate()}.csv")
+            val bufferedWriter = BufferedWriter(FileWriter(csv))
 
-                var i = 0
-//                while (i < dimensionHeaders.size && i < dimensions.size) {
-//                    println(dimensionHeaders[i] + ": " + dimensions[i])
-//                    i++
-//                }
+            println("Generating ${csv.name}")
 
-                for (j in metrics.indices) {
-                    print("Date Range ($j): ")
-                    val values = metrics[j]
-                    var k = 0
-                    while (k < values.getValues().size && k < metricHeaders.size) {
-                        println(metricHeaders[k].name + ": " + values.getValues()[k])
-                        k++
+            for (report in response.reports) {
+                val header = report.columnHeader
+                val dimensionHeaders = header.dimensions
+                val metricHeadersEntries = header.metricHeader.metricHeaderEntries
+                val rows = report.data.rows
+
+                if (rows.isEmpty()) {
+                    println("No data found for $GOOGLE_ANALYTICS_VIEW_ID")
+                    return
+                }
+
+                bufferedWriter.use { writer ->
+
+                    val metricHeaders = metricHeadersEntries.map { it.name }
+                    val headers = dimensionHeaders.joinToString(", ") { it.split(":")[1] }.plus(", ")
+                        .plus(metricHeaders.joinToString(", "))
+
+                    writer.write(headers)
+                    writer.newLine()
+                    writer.flush()
+
+                    for (row in rows) {
+                        val dimensions = row.dimensions
+                        val metricValues = row.metrics
+                        var dimensionsCounter = 0
+
+                        val dimensionsAndMetricsData = ArrayList<String>()
+
+                        while (dimensionsCounter < dimensionHeaders.size && dimensionsCounter < dimensions.size) {
+                            val dimension = dimensions[dimensionsCounter]
+                            dimensionsAndMetricsData.add(dimension)
+                            dimensionsCounter++
+                        }
+
+                        for (metricIndex in metricValues.indices) {
+                            val metricValue = metricValues[metricIndex]
+                            var metricCounter = 0
+                            while (metricCounter < metricHeadersEntries.size && metricCounter < metricValue.getValues().size) {
+                                val metric = metricValue.getValues()[metricCounter]
+                                dimensionsAndMetricsData.add(metric)
+                                metricCounter++
+                            }
+                        }
+                        val line = dimensionsAndMetricsData.joinToString(", ")
+                        writer.write(line)
+                        writer.newLine()
+                        writer.flush()
                     }
+
                 }
             }
+
+            println("${csv.name} can be found at ${csv.parent}")
+        } else {
+            println("Path: ${destinationDir.absolutePath} doesn't exist")
         }
     }
 
+    /**
+     * This function is used to generate a date in a readable format
+     * @return date in readable format
+     */
+    private fun generateDate(): String {
+        val date = Date()
+        val simpleDateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
+        return simpleDateFormat.format(date)
+    }
 }

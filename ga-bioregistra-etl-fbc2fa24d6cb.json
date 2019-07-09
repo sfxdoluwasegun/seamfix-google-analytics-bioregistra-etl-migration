@@ -1,0 +1,12 @@
+{
+  "type": "service_account",
+  "project_id": "ga-bioregistra-etl",
+  "private_key_id": "fbc2fa24d6cbb4dd51c54e9a309f34a92a61ba82",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQCncf3uIaVl9tsX\nJScDO16VYprZvomo2Z2UlyCK1VS5qnWWPDRZcgB+MhS7h7Cio6JdNmZDYr1lu4df\njKCtptU3vvqCZ7CaMt1Gg/wI2/WyOK4A5RIw1H6UNtrn9MwbP+P2ipoIHYa4fKeZ\nwJAbhhBpTxgD7mnSed2KwQBbFtX4USyC4dg3gUhYxBSxkFUwfoWHAE8CJCf5ynvF\nB1+WiYnYIGtZr/VUv+k8aqz4R6IOPHR7SnzDUOU6Tx/DNr+leyOhYoHX6im48hgG\nZ2Ur0iY93Wnpq+QIyRnr7yok5nVyTdIKCgutgS4YkbT339lgK05SF8gDZxVL1rNd\n0PCogF49AgMBAAECggEARgKV2t6LgrXzhdpdVO8aTVh0iU0uzn/qcIm9q/6lVZnN\nX1rdwnY1eY4j+AK0WlQTm2iW2l7q9KGzaMJqHiEOrie2IxcKknZo6UZe9y9Mq88i\nBbLBZ9Q49mx3G5vRSSVuAZOS8oix3uoTw2fteOyVaQqObnpdGYkllZG7vdou7YsJ\n4wDkCq9TfedfRdGtxIPolQKV1vpbPF327kPCCBHKOongzjJLkZg9H8XLMmuzQmx6\n+KW//1mue8iRh/UdDduqKirNG3zHmmN4a1vdFDQyrtgMCnFAQtnlo1AibWwy8NyE\nv360w98JuGXS0qM3uGjcwrmCnmKf+ghQJFuYf2HuOwKBgQDUPyGyh+rVrBhFuR3+\nKS9rpu2NZ2QCTJ516oGVb+lemMs8jCQ4ttX53mxtFOG0K3naM0/8/jf3sm3BtOhR\nJpXb3abwqqeyH/bpVkx0+YnOzNkwrw9LS/RTosQk9jSWq/6uYnn+7k3LDOnF2/um\nhOV0329vh1d2G0mejSOUeYKsswKBgQDJ9pCBIoCZRpmuqYMIxzZ2vuallLak0AD5\naW8UbjNc3gdvf9j5T9EHyKhqRgAcxmAQJBZHIAR27DbW6TJHGTDG/Qa2HCGRB/ci\nWRYGUHTZvd7xc0C9Hde+3ttIsiJPIxErSYtZGlRwo7luOV8XiafQV75sbpPTLyWi\nXgS6dG4hTwKBgFWTfsq08oJkeQTjtqwbfvswuucgoLosmleAze6qyLVTdd5bwt77\nGRs+CwmQOdCjFuZbegzPk1FTp91KS8EshY+4tu6iYCr5qFw8Z2dilaXEAm4Wp1v8\nq+5s2hjtDBcUEgPNwNKA0uzjr/4OzFA/lSSiUhPtxd3g8rXywj3DIGTxAoGBAMnZ\nX/twXE7UvOxQBuJTGB/+E88RnqmCKjccJSSqLzN1xMCvak9icmvxJEFyzNH1gjUf\nnBRh75Rb6UNJtjJQ/usiH/8KhpHJADqYBucwqlik55kxs1ZP6Tyex1MUli25woMc\n8eSP6CzbtYxwUpXXwpz71RnSOnQq/tYUWW1wyFEJAoGBAJypFN6ufHeXGfx4uqV+\nSq7YBV5yqjibyQplXw3QUvK014eSemhpx/5IgVPb6Ga73NZ3+yQwat/w5/SBDmFH\nWSepYCuE17h9HOtt9mpZ6k5dPLLP2obau/qUFL/DOZ5QDHGLsGmVqPud3upjyxo2\nXEF1ID24qG5bTctYCqlOVayI\n-----END PRIVATE KEY-----\n",
+  "client_email": "ga-etl-bioregistra@ga-bioregistra-etl.iam.gserviceaccount.com",
+  "client_id": "109672829763068220129",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/ga-etl-bioregistra%40ga-bioregistra-etl.iam.gserviceaccount.com"
+}

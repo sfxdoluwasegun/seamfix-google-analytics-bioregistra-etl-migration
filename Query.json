@@ -3,7 +3,7 @@
 
     {
       "query-name": "User",
-      "query-metrics": ["users", "newUsers", "percentNewSessions", "sessionsPerUsers"],
+      "query-metrics": ["users", "newUsers", "percentNewSessions", "sessionsPerUser"],
       "query-metric-dimensions": ["userType", "sessionCount", "daysSinceLastSession", "userDefinedValue", "userBucket"],
       "query-other-dimensions" : ["platform", "geo network", "system"]
     },
