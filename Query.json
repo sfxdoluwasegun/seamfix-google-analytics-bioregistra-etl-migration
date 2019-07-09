@@ -1,45 +1,18 @@
 {
-  "queries": [
-
-    {
-      "query-name": "User",
-      "query-metrics": ["users", "newUsers", "percentNewSessions", "sessionsPerUser"],
-      "query-metric-dimensions": ["userType", "sessionCount", "daysSinceLastSession", "userDefinedValue", "userBucket"],
-      "query-other-dimensions" : ["platform", "geo network", "system"]
-    },
-
-    {
-      "query-name": "Session",
-      "query-metrics": ["sessions", "bounces", "bounceRate", "sessionDuration", "avgSessionDuration", "uniqueDimensionCombinations", "hits"],
-      "query-metric-dimensions": ["sessionDurationBucket"],
-      "query-other-dimensions" : ["platform", "geo network", "system"]
-    },
-
-    {
-      "query-name": "Traffic Sources",
-      "query-metrics": ["organicSearches"],
-      "query-metric-dimensions": ["referralPath", "fullReferrer", "campaign", "source", "medium", "sourceMedium", "keyword", "adContent", "socialNetwork", "hasSocialSourceReferral", "campaignCode"],
-      "query-other-dimensions" : ["platform", "geo network", "system"]
-    },
-
-    {
-      "query-name": "Adwords",
-      "query-metrics": ["adDisplayUrl", "adDestinationUrl", "adwordsCustomerID", "adwordsCampaignID", "adwordsAdGroupID", "adwordsCreativeID", "adwordsCriteriaID", "adQueryWordCount", "isTrueViewVideoAd"],
-      "query-metric-dimensions": ["adGroup", "adSlot", "adDistributionNetwork", "adMatchType", "adKeywordMatchType", "adMatchedQuery",
-        "adPlacementDomain", "adPlacementUrl", "adFormat", "adTargetingType", "adTargetingOption", "adDisplayUrl", "adDestinationUrl", "adwordsCustomerID", "adwordsCampaignID",
-        "adwordsAdGroupID", "adwordsCreativeID", "adwordsCriteriaID", "adQueryWordCount", "isTrueViewVideoAd"],
-      "query-other-dimensions" : ["platform", "geo network", "system"]
-    },
-
-    {
-      "query-name": "Page Tracking",
-      "query-metrics": ["pageValue", "entrances", "entranceRate", "pageviews", "pageviewsPerSession", "uniquePageviews", "timeOnPage", "avgTimeOnPage", "exits", "exitRate"],
-      "query-metric-dimensions": ["hostname", "pagePath", "pagePathLevel1", "pagePathLevel2", "pagePathLevel3", "pagePathLevel4",
-        "pageTitle", "landingPagePath", "secondPagePath", "exitPagePath", "previousPagePath", "pageDepth"],
-      "query-other-dimensions" : ["platform", "geo network", "system"]
-    }
-
-  ],
+    "metrics": [
+      "users",
+      "newUsers",
+      "percentNewSessions",
+      "sessionsPerUser"
+    ],
+    "dimensions": [
+      "userType",
+      "sessionCount",
+      "daysSinceLastSession",
+      "userDefinedValue",
+      "userBucket",
+      "country"
+    ],
   "start-date": "30DaysAgo",
   "end-date": "today"
 }

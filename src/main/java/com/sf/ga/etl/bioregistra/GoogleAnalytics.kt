@@ -108,30 +108,22 @@ class GoogleAnalytics {
         println("Setting Date range from: ${dateRange.startDate} to ${dateRange.endDate}")
 
         // Create metrics
-        val queries = query.getJSONArray(QueryConstants.QUERIES)
-        val query = queries.getJSONObject(0)
-        val metrics = query.getJSONArray(QueryConstants.QUERY_METRICS)
-        val listOfMetrics = ArrayList<Metric>()
-        metrics.forEachIndexed { _, expression ->
-            val metric = Metric().apply {
+        val metricsJsonArray = query.getJSONArray(QueryConstants.METRICS)
+        val metrics = metricsJsonArray.map {expression ->
+            Metric().apply {
                 this.expression = GA_PREFIX.plus(expression)
                 this.alias = expression as String
                 println("Setting metrics: ${this.expression}\n")
             }
-            listOfMetrics.add(metric)
         }
 
-        // Create Dimension
-        val dimensions = query.getJSONArray(QueryConstants.QUERY_METRIC_DIMENSIONS).toList()
-        val otherDimensions = query.getJSONArray(QueryConstants.QUERY_OTHER_DIMENSIONS).toList()
-        val allDimensions = arrayListOf(*dimensions.toTypedArray(), *otherDimensions.toTypedArray())
-        val listOfDimensions = ArrayList<Dimension>()
-        dimensions.forEachIndexed { _, expression ->
-            val dimension = Dimension().apply {
+        // Create Dimensions
+        val dimensionsJsonArray = query.getJSONArray(QueryConstants.DIMENSIONS)
+        val dimensions = dimensionsJsonArray.map {expression ->
+            Dimension().apply {
                 this.name = GA_PREFIX.plus(expression)
                 println("Applying dimensions: ${this.name}\n")
             }
-            listOfDimensions.add(dimension)
         }
 
         println("Creating Google Analytics Report Request")
@@ -139,9 +131,8 @@ class GoogleAnalytics {
         val reportRequest = ReportRequest().apply {
             this.viewId = GA_PREFIX.plus(GOOGLE_ANALYTICS_VIEW_ID)
             this.dateRanges = arrayListOf(dateRange)
-            this.metrics = listOfMetrics
-            this.dimensions = listOfDimensions
-
+            this.metrics = metrics
+            this.dimensions = dimensions
         }
 
         return GetReportsRequest().apply {
@@ -158,7 +149,7 @@ class GoogleAnalytics {
      */
     @Throws(UnknownHostException::class)
     fun makeRequest(request: GetReportsRequest, analyticsReporter: AnalyticsReporting): GetReportsResponse {
-        println("Making request to Google Analytics with View ID: $GOOGLE_ANALYTICS_VIEW_ID")
+        println("Making request to Google Analytics for View ID: $GOOGLE_ANALYTICS_VIEW_ID")
         return analyticsReporter.reports().batchGet(request).execute()
     }
 
@@ -204,7 +195,7 @@ class GoogleAnalytics {
                         val metricValues = row.metrics
                         var dimensionsCounter = 0
 
-                        val dimensionsAndMetricsData = ArrayList<String>()
+                        val dimensionsAndMetricsData = arrayListOf<String>()
 
                         while (dimensionsCounter < dimensionHeaders.size && dimensionsCounter < dimensions.size) {
                             val dimension = dimensions[dimensionsCounter]
