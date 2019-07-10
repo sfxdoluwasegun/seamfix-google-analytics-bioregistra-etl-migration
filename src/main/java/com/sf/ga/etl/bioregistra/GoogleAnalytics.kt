@@ -16,6 +16,9 @@ import java.security.GeneralSecurityException
 import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.collections.HashMap
+import java.io.File
+import java.io.IOException
+import java.io.FileReader
 
 
 /**
@@ -112,7 +115,7 @@ class GoogleAnalytics {
 
         val listOfGetReportRequests = HashMap<String, GetReportsRequest>()
 
-        queries.forEach {query->
+        queries.forEach { query ->
 
             // Create metrics
             val metricsJsonArray = (query as JSONObject).getJSONArray(QueryConstants.METRICS)
@@ -142,7 +145,7 @@ class GoogleAnalytics {
                 this.dimensions = dimensions
             }
 
-            val getReportRequest =  GetReportsRequest().apply {
+            val getReportRequest = GetReportsRequest().apply {
                 this.reportRequests = arrayListOf(reportRequest)
             }
 
@@ -172,7 +175,7 @@ class GoogleAnalytics {
      * @param destinationPath where the file should be written to
      * @param csvPrefix of the particular Google Analytic report
      */
-    fun generateCSV(response: GetReportsResponse, destinationPath: String, csvPrefix:  String) {
+    fun generateCSV(response: GetReportsResponse, destinationPath: String, csvPrefix: String) {
 
         val destinationDir = File(destinationPath)
 
@@ -198,8 +201,11 @@ class GoogleAnalytics {
 
                     val listOfMetricHeaders = metricHeadersEntries.map { it.name }
 
-                    val dimensionsHeaders = listOfDimensionHeaders?.joinToString(", ") { it.split(":")[1] }?.plus(", ")?.plus(listOfMetricHeaders.joinToString(", "))
-                        ?: listOfMetricHeaders.joinToString(", ")
+                    val dimensionsHeaders =
+                        listOfDimensionHeaders?.joinToString(", ") { it.split(":")[1] }?.plus(", ")?.plus(
+                            listOfMetricHeaders.joinToString(", ")
+                        )
+                            ?: listOfMetricHeaders.joinToString(", ")
 
                     writer.write(dimensionsHeaders)
                     writer.newLine()
