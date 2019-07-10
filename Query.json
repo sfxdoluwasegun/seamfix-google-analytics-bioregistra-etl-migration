@@ -1,44 +1,75 @@
 {
   "queries": [
-
     {
-      "query-name": "User",
-      "query-metrics": ["users", "newUsers", "percentNewSessions", "sessionsPerUsers"],
-      "query-metric-dimensions": ["userType", "sessionCount", "daysSinceLastSession", "userDefinedValue", "userBucket"],
-      "query-other-dimensions" : ["platform", "geo network", "system"]
+      "name": "User",
+      "metrics": [
+        "users",
+        "newUsers",
+        "percentNewSessions",
+        "sessionsPerUser"
+      ],
+      "dimensions": [
+        "userType",
+        "sessionCount",
+        "daysSinceLastSession",
+        "userDefinedValue",
+        "userBucket"
+      ]
     },
-
     {
-      "query-name": "Session",
-      "query-metrics": ["sessions", "bounces", "bounceRate", "sessionDuration", "avgSessionDuration", "uniqueDimensionCombinations", "hits"],
-      "query-metric-dimensions": ["sessionDurationBucket"],
-      "query-other-dimensions" : ["platform", "geo network", "system"]
+      "name": "Session",
+      "metrics": [
+        "sessions",
+        "bounces",
+        "bounceRate",
+        "sessionDuration",
+        "avgSessionDuration",
+        "uniqueDimensionCombinations",
+        "hits"
+      ],
+      "dimensions": [
+        "sessionDurationBucket"
+      ]
     },
-
     {
-      "query-name": "Traffic Sources",
-      "query-metrics": ["organicSearches"],
-      "query-metric-dimensions": ["referralPath", "fullReferrer", "campaign", "source", "medium", "sourceMedium", "keyword", "adContent", "socialNetwork", "hasSocialSourceReferral", "campaignCode"],
-      "query-other-dimensions" : ["platform", "geo network", "system"]
+      "name": "Traffic Sources",
+      "metrics": [
+        "organicSearches"
+      ],
+      "dimensions": [
+        "referralPath",
+        "fullReferrer",
+        "campaign",
+        "source",
+        "medium",
+        "sourceMedium",
+        "keyword",
+        "adContent",
+        "socialNetwork"
+      ]
     },
-
     {
-      "query-name": "Adwords",
-      "query-metrics": ["adDisplayUrl", "adDestinationUrl", "adwordsCustomerID", "adwordsCampaignID", "adwordsAdGroupID", "adwordsCreativeID", "adwordsCriteriaID", "adQueryWordCount", "isTrueViewVideoAd"],
-      "query-metric-dimensions": ["adGroup", "adSlot", "adDistributionNetwork", "adMatchType", "adKeywordMatchType", "adMatchedQuery",
-        "adPlacementDomain", "adPlacementUrl", "adFormat", "adTargetingType", "adTargetingOption", "adDisplayUrl", "adDestinationUrl", "adwordsCustomerID", "adwordsCampaignID",
-        "adwordsAdGroupID", "adwordsCreativeID", "adwordsCriteriaID", "adQueryWordCount", "isTrueViewVideoAd"],
-      "query-other-dimensions" : ["platform", "geo network", "system"]
-    },
-
-    {
-      "query-name": "Page Tracking",
-      "query-metrics": ["pageValue", "entrances", "entranceRate", "pageviews", "pageviewsPerSession", "uniquePageviews", "timeOnPage", "avgTimeOnPage", "exits", "exitRate"],
-      "query-metric-dimensions": ["hostname", "pagePath", "pagePathLevel1", "pagePathLevel2", "pagePathLevel3", "pagePathLevel4",
-        "pageTitle", "landingPagePath", "secondPagePath", "exitPagePath", "previousPagePath", "pageDepth"],
-      "query-other-dimensions" : ["platform", "geo network", "system"]
+      "name": "Adwords",
+      "metrics": [
+        "impressions",
+        "adClicks",
+        "adCost",
+        "CPM",
+        "CPC",
+        "CTR",
+        "costPerTransaction",
+        "costPerGoalConversion",
+        "costPerConversion"
+      ],
+      "dimensions": [
+        "adGroup",
+        "adSlot",
+        "adDistributionNetwork",
+        "adMatchType",
+        "adKeywordMatchType",
+        "adMatchedQuery"
+      ]
     }
-
   ],
   "start-date": "30DaysAgo",
   "end-date": "today"
