@@ -10,11 +10,12 @@ import com.google.api.services.analyticsreporting.v4.model.*
 import org.json.JSONObject
 import java.io.*
 import java.lang.IllegalStateException
+import java.net.SocketException
 import java.net.UnknownHostException
 import java.security.GeneralSecurityException
 import java.text.SimpleDateFormat
 import java.util.*
-import kotlin.collections.ArrayList
+import kotlin.collections.HashMap
 
 
 /**
@@ -28,7 +29,7 @@ class GoogleAnalytics {
         private const val GA_PREFIX = "ga:"
         private const val APPLICATION_NAME = "Google Analytics ETL BioRegistra"
         private const val GOOGLE_ANALYTICS_VIEW_ID = "150721365"
-        private const val CSV_PREFIX = "GA-BIOREGISTRA-"
+        private const val CSV_TAG = "GA-BIOREGISTRA-"
     }
 
     private lateinit var query: JSONObject
@@ -98,7 +99,7 @@ class GoogleAnalytics {
      * This method, builds the Google Analytics query
      * @return GetReportsRequest containing the query
      */
-    fun buildQuery(): GetReportsRequest {
+    fun buildQuery(): Map<String, GetReportsRequest> {
 
         // Create date range
         val dateRange = DateRange()
@@ -107,38 +108,49 @@ class GoogleAnalytics {
 
         println("Setting Date range from: ${dateRange.startDate} to ${dateRange.endDate}")
 
-        // Create metrics
-        val metricsJsonArray = query.getJSONArray(QueryConstants.METRICS)
-        val metrics = metricsJsonArray.map {expression ->
-            Metric().apply {
-                this.expression = GA_PREFIX.plus(expression)
-                this.alias = expression as String
-                println("Setting metrics: ${this.expression}\n")
+        val queries = query.getJSONArray(QueryConstants.QUERIES)
+
+        val listOfGetReportRequests = HashMap<String, GetReportsRequest>()
+
+        queries.forEach {query->
+
+            // Create metrics
+            val metricsJsonArray = (query as JSONObject).getJSONArray(QueryConstants.METRICS)
+            val metrics = metricsJsonArray.map { expression ->
+                Metric().apply {
+                    this.expression = GA_PREFIX.plus(expression)
+                    this.alias = expression as String
+                    println("Setting metrics: ${this.expression}\n")
+                }
             }
-        }
 
-        // Create Dimensions
-        val dimensionsJsonArray = query.getJSONArray(QueryConstants.DIMENSIONS)
-        val dimensions = dimensionsJsonArray.map {expression ->
-            Dimension().apply {
-                this.name = GA_PREFIX.plus(expression)
-                println("Applying dimensions: ${this.name}\n")
+            // Create Dimensions
+            val dimensionsJsonArray = query.getJSONArray(QueryConstants.DIMENSIONS)
+            val dimensions = dimensionsJsonArray.map { expression ->
+                Dimension().apply {
+                    this.name = GA_PREFIX.plus(expression)
+                    println("Applying dimensions: ${this.name}\n")
+                }
             }
+
+            println("Creating Google Analytics Report Request for ${query.getString(QueryConstants.NAME)}")
+
+            val reportRequest = ReportRequest().apply {
+                this.viewId = GA_PREFIX.plus(GOOGLE_ANALYTICS_VIEW_ID)
+                this.dateRanges = arrayListOf(dateRange)
+                this.metrics = metrics
+                this.dimensions = dimensions
+            }
+
+            val getReportRequest =  GetReportsRequest().apply {
+                this.reportRequests = arrayListOf(reportRequest)
+            }
+
+            listOfGetReportRequests[query.getString(QueryConstants.NAME)] = getReportRequest
+
         }
 
-        println("Creating Google Analytics Report Request")
-
-        val reportRequest = ReportRequest().apply {
-            this.viewId = GA_PREFIX.plus(GOOGLE_ANALYTICS_VIEW_ID)
-            this.dateRanges = arrayListOf(dateRange)
-            this.metrics = metrics
-            this.dimensions = dimensions
-        }
-
-        return GetReportsRequest().apply {
-            this.reportRequests = arrayListOf(reportRequest)
-        }
-
+        return listOfGetReportRequests
     }
 
     /**
@@ -147,7 +159,7 @@ class GoogleAnalytics {
      * @param analyticsReporter used to make the reports
      * @return GetReportsResponse containing the responses
      */
-    @Throws(UnknownHostException::class)
+    @Throws(UnknownHostException::class, SocketException::class)
     fun makeRequest(request: GetReportsRequest, analyticsReporter: AnalyticsReporting): GetReportsResponse {
         println("Making request to Google Analytics for View ID: $GOOGLE_ANALYTICS_VIEW_ID")
         return analyticsReporter.reports().batchGet(request).execute()
@@ -157,36 +169,39 @@ class GoogleAnalytics {
      * Parses and prints the Analytics Reporting API V4 response.
      *
      * @param response An Analytics Reporting API V4 response.
+     * @param destinationPath where the file should be written to
+     * @param csvPrefix of the particular Google Analytic report
      */
-    fun generateCSV(response: GetReportsResponse, destinationPath: String) {
+    fun generateCSV(response: GetReportsResponse, destinationPath: String, csvPrefix:  String) {
 
         val destinationDir = File(destinationPath)
 
         if (destinationDir.exists()) {
 
-            val csv = File(destinationDir, "$CSV_PREFIX${generateDate()}.csv")
+            val csv = File(destinationDir, "$csvPrefix-$CSV_TAG${generateDate()}.csv")
             val bufferedWriter = BufferedWriter(FileWriter(csv))
 
             println("Generating ${csv.name}")
 
             for (report in response.reports) {
                 val header = report.columnHeader
-                val dimensionHeaders = header.dimensions
+                val listOfDimensionHeaders = header.dimensions
                 val metricHeadersEntries = header.metricHeader.metricHeaderEntries
                 val rows = report.data.rows
 
-                if (rows.isEmpty()) {
+                if (rows.isNullOrEmpty()) {
                     println("No data found for $GOOGLE_ANALYTICS_VIEW_ID")
-                    return
+                    continue
                 }
 
                 bufferedWriter.use { writer ->
 
-                    val metricHeaders = metricHeadersEntries.map { it.name }
-                    val headers = dimensionHeaders.joinToString(", ") { it.split(":")[1] }.plus(", ")
-                        .plus(metricHeaders.joinToString(", "))
+                    val listOfMetricHeaders = metricHeadersEntries.map { it.name }
 
-                    writer.write(headers)
+                    val dimensionsHeaders = listOfDimensionHeaders?.joinToString(", ") { it.split(":")[1] }?.plus(", ")?.plus(listOfMetricHeaders.joinToString(", "))
+                        ?: listOfMetricHeaders.joinToString(", ")
+
+                    writer.write(dimensionsHeaders)
                     writer.newLine()
                     writer.flush()
 
@@ -197,10 +212,12 @@ class GoogleAnalytics {
 
                         val dimensionsAndMetricsData = arrayListOf<String>()
 
-                        while (dimensionsCounter < dimensionHeaders.size && dimensionsCounter < dimensions.size) {
-                            val dimension = dimensions[dimensionsCounter]
-                            dimensionsAndMetricsData.add(dimension)
-                            dimensionsCounter++
+                        listOfDimensionHeaders?.let {
+                            while (dimensionsCounter < listOfDimensionHeaders.size && dimensionsCounter < dimensions.size) {
+                                val dimension = dimensions[dimensionsCounter]
+                                dimensionsAndMetricsData.add(dimension)
+                                dimensionsCounter++
+                            }
                         }
 
                         for (metricIndex in metricValues.indices) {

@@ -9,6 +9,8 @@ class QueryConstants {
     companion object {
 
         // Query
+        const val QUERIES = "queries"
+        const val NAME = "name"
         const val METRICS = "metrics"
         const val DIMENSIONS = "dimensions"
         const val START_DATE = "start-date"

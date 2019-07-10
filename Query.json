@@ -1,18 +1,76 @@
 {
-    "metrics": [
-      "users",
-      "newUsers",
-      "percentNewSessions",
-      "sessionsPerUser"
-    ],
-    "dimensions": [
-      "userType",
-      "sessionCount",
-      "daysSinceLastSession",
-      "userDefinedValue",
-      "userBucket",
-      "country"
-    ],
+  "queries": [
+    {
+      "name": "User",
+      "metrics": [
+        "users",
+        "newUsers",
+        "percentNewSessions",
+        "sessionsPerUser"
+      ],
+      "dimensions": [
+        "userType",
+        "sessionCount",
+        "daysSinceLastSession",
+        "userDefinedValue",
+        "userBucket"
+      ]
+    },
+    {
+      "name": "Session",
+      "metrics": [
+        "sessions",
+        "bounces",
+        "bounceRate",
+        "sessionDuration",
+        "avgSessionDuration",
+        "uniqueDimensionCombinations",
+        "hits"
+      ],
+      "dimensions": [
+        "sessionDurationBucket"
+      ]
+    },
+    {
+      "name": "Traffic Sources",
+      "metrics": [
+        "organicSearches"
+      ],
+      "dimensions": [
+        "referralPath",
+        "fullReferrer",
+        "campaign",
+        "source",
+        "medium",
+        "sourceMedium",
+        "keyword",
+        "adContent",
+        "socialNetwork"
+      ]
+    },
+    {
+      "name": "Adwords",
+      "metrics": [
+        "impressions",
+        "adClicks",
+        "adCost",
+        "CPM",
+        "CPC",
+        "CTR",
+        "costPerTransaction",
+        "costPerGoalConversion",
+        "costPerConversion"
+      ],
+      "dimensions": [
+        "adGroup",
+        "adSlot",
+        "adDistributionNetwork",
+        "adMatchType",
+        "adKeywordMatchType",
+        "adMatchedQuery"
+      ]
+    }
+  ],
   "start-date": "30DaysAgo",
   "end-date": "today"
 }
