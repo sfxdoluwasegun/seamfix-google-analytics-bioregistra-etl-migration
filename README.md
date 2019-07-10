@@ -38,9 +38,6 @@
 * Traffic Sources
 * Adwords
 * Goal Conversions
-* Platform or Devices
-* Geo Network
-* System
 * Page Tracking
 * Site Speed
 * App Tracking
